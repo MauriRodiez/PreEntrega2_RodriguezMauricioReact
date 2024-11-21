@@ -1,47 +1,61 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom"
+import { useParams } from "react-router-dom";
+import { Box, Typography, CircularProgress, Alert } from "@mui/material";
 import { endpoints } from "../utils/endpoints";
 import ItemDetail from "../components/ItemDetail";
 
 const ItemDetailContainer = () => {
-
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
-  const {id} = useParams();
-  console.log("Este es el id recuperado " + id);
-  useEffect( () => {
-    
+  const { id } = useParams();
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         setError(null);
         const response = await fetch(endpoints.url);
-        if(!response.ok){
+        if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const result = await response.json();
         const resultProduct = result.find((product) => product.id === parseInt(id));
-        console.log("Filtered product:", resultProduct);
 
         setData(resultProduct);
-
       } catch (error) {
         setError(error.message);
-      } 
-    }
+      }
+    };
 
     fetchData();
   }, [id]);
 
   return (
-    <div>
-      <h1>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+        padding: 2,
+        bgcolor: "background.default",
+        color: "text.primary",
+      }}
+    >
+      <Typography variant="h4" component="h1" sx={{ mb: 4 }}>
         Detalle del producto
-      </h1>
-      <ItemDetail product = {data} />
-    </div>
-  )
-}
+      </Typography>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {!data && !error && <CircularProgress />}
+      {data && <ItemDetail product={data} />}
+    </Box>
+  );
+};
 
-export default ItemDetailContainer
+export default ItemDetailContainer;
